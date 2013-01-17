@@ -26,7 +26,7 @@ def getData(param):
             ValName = elem.childNodes[0].nodeValue
             for elem in currval:
                 ValMeanRate = elem.childNodes[0].nodeValue
-            print "%s %s" % (ValName, ValMeanRate)
+                print "%s %s" % (ValName, ValMeanRate)
 
 if __name__ == "__main__":
     SourceUrl = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
