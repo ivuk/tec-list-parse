@@ -3,23 +3,26 @@
 from xml.dom import minidom
 import urllib2
 import datetime
-
+import os
 
 def getDataFile(Url, FileName):
     """
     Generic function for opening an URL and saving its content to file
     """
-    try:
-        DataFile = urllib2.urlopen(Url)
-    except urllib2.URLError, e:
-        print "Got URLError from urllib2, reason: %s" % e.reason
+    if not os.path.isfile(FileName) and not os.access(FileName, os.R_OK):
+        try:
+            DataFile = urllib2.urlopen(Url)
+        except urllib2.URLError, e:
+            print "Got URLError from urllib2, reason: %s" % e.reason
+        else:
+            Output = open(FileName, 'wb')
+            Output.write(DataFile.read())
+            Output.close()
     else:
-        Output = open(FileName, 'wb')
-        Output.write(DataFile.read())
-        Output.close()
+        print "File '%s' already exists, using existing data." % FileName
 
 
-def getHNBFile():
+def getHNBDataFile():
     """
     Get the required data file from HNB
     """
@@ -43,7 +46,7 @@ def getHNBData(FileName):
     """
     Print out data from HNB
     """
-    print "--- HNB ---"
+    print "--- HNB ---\nName\tMean Rate"
     try:
         HnbFile = open(FileName, "r")
     except IOError, e:
@@ -53,7 +56,7 @@ def getHNBData(FileName):
         for elem in HnbFile:
             elem = elem.strip()
             column = elem.split()
-            print "%s %s" % (str(column[0])[3:6], column[2])
+            print "%s\t%s" % (str(column[0])[3:6], column[2])
         HnbFile.close()
 
 
@@ -79,4 +82,4 @@ def getPBZData(FileName):
 
 if __name__ == "__main__":
     getPBZDataFile()
-    getHNBFile()
+    getHNBDataFile()
