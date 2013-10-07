@@ -5,6 +5,7 @@ import urllib2
 import datetime
 import os
 
+
 def getDataFile(Url, FileName):
     """
     Generic function for opening an URL and saving its content to file
