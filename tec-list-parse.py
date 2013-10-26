@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+
 from xml.dom import minidom
 import urllib2
 import datetime
 import os
+import argparse
 
 
 def getDataFile(Url, FileName):
@@ -23,7 +25,7 @@ def getDataFile(Url, FileName):
         print "File '%s' already exists, using existing data." % FileName
 
 
-def getHNBDataFile():
+def getHNBDataFile(Currency):
     """
     Get the required data file from HNB
     """
@@ -31,19 +33,27 @@ def getHNBDataFile():
     HnbUrl = "http://www.hnb.hr/tecajn/f%s.dat" % (now.strftime("%d%m%y"))
     HnbFileName = "f%s.dat" % (now.strftime("%d%m%y"))
     getDataFile(HnbUrl, HnbFileName)
-    getHNBData(HnbFileName)
+
+    if Currency == 'all':
+        getHNBData(HnbFileName, 'all')
+    else:
+        getHNBData(HnbFileName, Currency)
 
 
-def getPBZDataFile():
+def getPBZDataFile(Currency):
     """
     Get the required data file from PBZ
     """
     PBZUrl = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
     getDataFile(PBZUrl, 'PBZteclist.xml')
-    getPBZData('PBZteclist.xml')
+
+    if Currency == 'all':
+        getPBZData('PBZteclist.xml', 'all')
+    else:
+        getPBZData('PBZteclist.xml', Currency)
 
 
-def getHNBData(FileName):
+def getHNBData(FileName, Currency):
     """
     Print out data from HNB
     """
@@ -57,11 +67,16 @@ def getHNBData(FileName):
         for elem in HnbFile:
             elem = elem.strip()
             column = elem.split()
-            print "%s\t%s" % (str(column[0])[3:6], column[2])
+
+            if Currency == 'all':
+                print "%s\t%s" % (str(column[0])[3:6], column[2])
+            elif Currency == str(column[0])[3:6]:
+                print "%s\t%s" % (str(column[0])[3:6], column[2])
+
         HnbFile.close()
 
 
-def getPBZData(FileName):
+def getPBZData(FileName, Currency):
     """
     Print out data from PBZ
     """
@@ -79,8 +94,55 @@ def getPBZData(FileName):
                 ValName = elem.childNodes[0].nodeValue
                 for elem in currval:
                     ValMeanRate = elem.childNodes[0].nodeValue
-                    print "%s\t%s" % (ValName, ValMeanRate)
+
+                    if Currency == 'all':
+                        print "%s\t%s" % (ValName, ValMeanRate)
+                    elif Currency == ValName:
+                        print "%s\t%s" % (ValName, ValMeanRate)
+
+
+def RemoveDataFiles():
+    """
+    Function for removing the downloaded data files
+    """
+    now = datetime.datetime.now()
+    HnbFileName = "f%s.dat" % (now.strftime("%d%m%y"))
+    PBZFileName = 'PBZteclist.xml'
+
+    for DataFile in HnbFileName, PBZFileName:
+        if os.path.isfile(DataFile) and os.access(DataFile, os.W_OK):
+            try:
+                os.remove(DataFile)
+                print "Removing %s..." % DataFile
+            except OSError, e:
+                print "Got OSError, '%s: %s'" % (e.errno, e.strerror)
+
+
+def doit():
+    """
+    Set up the available program options
+    Call the proper functions with proper parameters depending on user
+    input
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-a', '--all', help='Show values for all available \
+            currencies', action="store_true")
+    parser.add_argument('-c', '--currency', help='Set the currency for which \
+            the value is shown', type=str)
+    parser.add_argument('-r', '--reset', help='Remove the data files that \
+            have been downloaded', action="store_true")
+
+    args = parser.parse_args()
+
+    if args.all:
+        getPBZDataFile('all')
+        getHNBDataFile('all')
+    if args.currency:
+        getPBZDataFile(args.currency)
+        getHNBDataFile(args.currency)
+    if args.reset:
+        RemoveDataFiles()
+
 
 if __name__ == "__main__":
-    getPBZDataFile()
-    getHNBDataFile()
+    doit()
