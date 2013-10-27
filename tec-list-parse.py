@@ -108,8 +108,9 @@ def RemoveDataFiles():
     now = datetime.datetime.now()
     HnbFileName = "f%s.dat" % (now.strftime("%d%m%y"))
     PBZFileName = 'PBZteclist.xml'
+    FileNames = [HnbFileName, PBZFileName]
 
-    for DataFile in HnbFileName, PBZFileName:
+    for DataFile in FileNames:
         if os.path.isfile(DataFile) and os.access(DataFile, os.W_OK):
             try:
                 os.remove(DataFile)
