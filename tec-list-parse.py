@@ -138,10 +138,10 @@ def doit():
     if args.all:
         getPBZDataFile('all')
         getHNBDataFile('all')
-    if args.currency:
+    elif args.currency:
         getPBZDataFile(args.currency)
         getHNBDataFile(args.currency)
-    if args.reset:
+    elif args.reset:
         RemoveDataFiles()
 
 
