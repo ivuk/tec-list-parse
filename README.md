@@ -1,4 +1,7 @@
 tec-list-parse
 ==============
 
-XML parser za tečajnu listu PBZ-a
+Parser za tečajnu listu PBZ-a (XML) i HNB-a (plaintext file).
+
+Korištenje:
+    ./tec-list-parse.py -h
