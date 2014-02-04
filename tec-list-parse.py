@@ -127,15 +127,18 @@ def doit():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--all', help='Show values for all available \
-            currencies', action="store_true")
+            currencies', action="store_true", dest='All')
     parser.add_argument('-c', '--currency', help='Set the currency for which \
-            the value is shown', type=str)
+            the value is shown', type=str, dest='currency')
     parser.add_argument('-r', '--reset', help='Remove the data files that \
-            have been downloaded', action="store_true")
+            have been downloaded', action="store_true", dest='reset')
 
     args = parser.parse_args()
 
-    if args.all:
+    if not args.All and not args.currency and not args.reset:
+        parser.print_help()
+
+    if args.All:
         getPBZDataFile('all')
         getHNBDataFile('all')
     elif args.currency:
