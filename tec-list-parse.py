@@ -10,7 +10,8 @@ import argparse
 
 def getHNBData(Currency):
     """
-    Print out data from HNB
+    Get the required data from HNB's website
+    Print out the data
     """
     now = datetime.datetime.now()
     HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
@@ -32,7 +33,8 @@ def getHNBData(Currency):
 
 def getPBZData(Currency):
     """
-    Print out data from PBZ
+    Get the required data from PBZ's website
+    Print out the data
     """
     PBZUrl = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
 
