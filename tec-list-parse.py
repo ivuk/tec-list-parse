@@ -8,36 +8,6 @@ import os
 import argparse
 
 
-def getDataFile(Url, FileName):
-    """
-    Generic function for opening an URL and saving its content to file
-    """
-    if not os.path.isfile(FileName) and not os.access(FileName, os.R_OK):
-        try:
-            DataFile = urllib.request.urlopen(Url)
-        except urllib.error.URLError as e:
-            print("Got URLError from urllib.request, reason: {}".format(e.reason))
-        else:
-            Output = open(FileName, 'wb')
-            Output.write(DataFile.read())
-            Output.close()
-    else:
-        print("File '{}' already exists, using existing data.".format(FileName))
-
-
-def getPBZDataFile(Currency):
-    """
-    Get the required data file from PBZ
-    """
-    PBZUrl = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
-    getDataFile(PBZUrl, 'PBZteclist.xml')
-
-    if Currency == 'all':
-        getPBZData('PBZteclist.xml', 'all')
-    else:
-        getPBZData('PBZteclist.xml', Currency)
-
-
 def getHNBData(Currency):
     """
     Print out data from HNB
@@ -60,22 +30,25 @@ def getHNBData(Currency):
                 print("{}\t{}".format(str(column[0])[3:6], column[2]))
 
 
-def getPBZData(FileName, Currency):
+def getPBZData(Currency):
     """
     Print out data from PBZ
     """
+    PBZUrl = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
+
     print("--- PBZ ---\nName\tMean Rate")
-    try:
-        doc = minidom.parse(FileName)
-    except IOError as e:
-        print("Got IOError, '{}: {}'".format(e.errno, e.strerror))
-    else:
+
+    with urllib.request.urlopen(PBZUrl) as Url:
+        doc = minidom.parse(Url)
         currencies = doc.getElementsByTagName("Currency")
+
         for elem in currencies:
             currname = elem.getElementsByTagName('Name')
             currval = elem.getElementsByTagName('MeanRate')
+
             for elem in currname:
                 ValName = elem.childNodes[0].nodeValue
+
                 for elem in currval:
                     ValMeanRate = elem.childNodes[0].nodeValue
 
@@ -83,22 +56,6 @@ def getPBZData(FileName, Currency):
                         print("{}\t{}".format(ValName, ValMeanRate))
                     elif Currency == ValName:
                         print("{}\t{}".format(ValName, ValMeanRate))
-
-
-def RemoveDataFiles():
-    """
-    Function for removing the downloaded data files
-    """
-    PBZFileName = 'PBZteclist.xml'
-    FileNames = [PBZFileName]
-
-    for DataFile in FileNames:
-        if os.path.isfile(DataFile) and os.access(DataFile, os.W_OK):
-            try:
-                os.remove(DataFile)
-                print("Removing {}...".format(DataFile))
-            except OSError as e:
-                print("Got OSError, '{}: {}'".format(e.errno, e.strerror))
 
 
 def doit():
@@ -112,22 +69,18 @@ def doit():
             currencies', action="store_true", dest='All')
     parser.add_argument('-c', '--currency', help='Set the currency for which \
             the value is shown', type=str, dest='currency')
-    parser.add_argument('-r', '--reset', help='Remove the data files that \
-            have been downloaded', action="store_true", dest='reset')
 
     args = parser.parse_args()
 
-    if not args.All and not args.currency and not args.reset:
+    if not args.All and not args.currency:
         parser.print_help()
 
     if args.All:
-        getPBZDataFile('all')
+        getPBZData('all')
         getHNBData('all')
     elif args.currency:
-        getPBZDataFile(args.currency)
+        getPBZData(args.currency)
         getHNBData(args.currency)
-    elif args.reset:
-        RemoveDataFiles()
 
 
 if __name__ == "__main__":
