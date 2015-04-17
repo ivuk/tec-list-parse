@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 from xml.dom import minidom
-import urllib2
+import urllib.request
 import datetime
 import os
 import argparse
@@ -14,15 +14,15 @@ def getDataFile(Url, FileName):
     """
     if not os.path.isfile(FileName) and not os.access(FileName, os.R_OK):
         try:
-            DataFile = urllib2.urlopen(Url)
-        except urllib2.URLError, e:
-            print "Got URLError from urllib2, reason: %s" % e.reason
+            DataFile = urllib.request.urlopen(Url)
+        except urllib.error.URLError as e:
+            print("Got URLError from urllib2, reason: {}".format(e.reason))
         else:
             Output = open(FileName, 'wb')
             Output.write(DataFile.read())
             Output.close()
     else:
-        print "File '%s' already exists, using existing data." % FileName
+        print("File '{}' already exists, using existing data.".format(FileName))
 
 
 def getHNBDataFile(Currency):
@@ -30,8 +30,8 @@ def getHNBDataFile(Currency):
     Get the required data file from HNB
     """
     now = datetime.datetime.now()
-    HnbUrl = "http://www.hnb.hr/tecajn/f%s.dat" % (now.strftime("%d%m%y"))
-    HnbFileName = "f%s.dat" % (now.strftime("%d%m%y"))
+    HnbUrl = "http://www.hnb.hr/tecajn/f{}.dat".format(now.strftime("%d%m%y"))
+    HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
     getDataFile(HnbUrl, HnbFileName)
 
     if Currency == 'all':
@@ -57,11 +57,11 @@ def getHNBData(FileName, Currency):
     """
     Print out data from HNB
     """
-    print "--- HNB ---\nName\tMean Rate"
+    print("--- HNB ---\nName\tMean Rate")
     try:
         HnbFile = open(FileName, "r")
-    except IOError, e:
-        print "Got IOError, '%s: %s'" % (e.errno, e.strerror)
+    except IOError as e:
+        print("Got IOError, '{}: {}'".format(e.errno, e.strerror))
     else:
         HeaderLine = HnbFile.readline()
         for elem in HnbFile:
@@ -69,9 +69,9 @@ def getHNBData(FileName, Currency):
             column = elem.split()
 
             if Currency == 'all':
-                print "%s\t%s" % (str(column[0])[3:6], column[2])
+                print("{}\t{}".format(str(column[0])[3:6], column[2]))
             elif Currency == str(column[0])[3:6]:
-                print "%s\t%s" % (str(column[0])[3:6], column[2])
+                print("{}\t{}".format(str(column[0])[3:6], column[2]))
 
         HnbFile.close()
 
@@ -80,11 +80,11 @@ def getPBZData(FileName, Currency):
     """
     Print out data from PBZ
     """
-    print "--- PBZ ---\nName\tMean Rate"
+    print("--- PBZ ---\nName\tMean Rate")
     try:
         doc = minidom.parse(FileName)
-    except IOError, e:
-        print "Got IOError, '%s: %s'" % (e.errno, e.strerror)
+    except IOError as e:
+        print("Got IOError, '{}: {}'".format(e.errno, e.strerror))
     else:
         currencies = doc.getElementsByTagName("Currency")
         for elem in currencies:
@@ -96,9 +96,9 @@ def getPBZData(FileName, Currency):
                     ValMeanRate = elem.childNodes[0].nodeValue
 
                     if Currency == 'all':
-                        print "%s\t%s" % (ValName, ValMeanRate)
+                        print("{}\t{}".format(ValName, ValMeanRate))
                     elif Currency == ValName:
-                        print "%s\t%s" % (ValName, ValMeanRate)
+                        print("{}\t{}".format(ValName, ValMeanRate))
 
 
 def RemoveDataFiles():
@@ -106,7 +106,7 @@ def RemoveDataFiles():
     Function for removing the downloaded data files
     """
     now = datetime.datetime.now()
-    HnbFileName = "f%s.dat" % (now.strftime("%d%m%y"))
+    HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
     PBZFileName = 'PBZteclist.xml'
     FileNames = [HnbFileName, PBZFileName]
 
@@ -114,9 +114,9 @@ def RemoveDataFiles():
         if os.path.isfile(DataFile) and os.access(DataFile, os.W_OK):
             try:
                 os.remove(DataFile)
-                print "Removing %s..." % DataFile
-            except OSError, e:
-                print "Got OSError, '%s: %s'" % (e.errno, e.strerror)
+                print("Removing {}...".format(DataFile))
+            except OSError as e:
+                print("Got OSError, '{}: {}'".format(e.errno, e.strerror))
 
 
 def doit():
