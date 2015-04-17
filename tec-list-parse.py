@@ -30,8 +30,8 @@ def getHNBDataFile(Currency):
     Get the required data file from HNB
     """
     now = datetime.datetime.now()
-    HnbUrl = "http://www.hnb.hr/tecajn/f{}.dat".format(now.strftime("%d%m%y"))
     HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
+    HnbUrl = "http://www.hnb.hr/tecajn/{}".format(HnbFileName)
     getDataFile(HnbUrl, HnbFileName)
 
     if Currency == 'all':
