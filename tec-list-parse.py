@@ -25,21 +25,6 @@ def getDataFile(Url, FileName):
         print("File '{}' already exists, using existing data.".format(FileName))
 
 
-def getHNBDataFile(Currency):
-    """
-    Get the required data file from HNB
-    """
-    now = datetime.datetime.now()
-    HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
-    HnbUrl = "http://www.hnb.hr/tecajn/{}".format(HnbFileName)
-    getDataFile(HnbUrl, HnbFileName)
-
-    if Currency == 'all':
-        getHNBData(HnbFileName, 'all')
-    else:
-        getHNBData(HnbFileName, Currency)
-
-
 def getPBZDataFile(Currency):
     """
     Get the required data file from PBZ
@@ -53,27 +38,26 @@ def getPBZDataFile(Currency):
         getPBZData('PBZteclist.xml', Currency)
 
 
-def getHNBData(FileName, Currency):
+def getHNBData(Currency):
     """
     Print out data from HNB
     """
+    now = datetime.datetime.now()
+    HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
+    HnbUrl = "http://www.hnb.hr/tecajn/{}".format(HnbFileName)
+
     print("--- HNB ---\nName\tMean Rate")
-    try:
-        HnbFile = open(FileName, "r")
-    except IOError as e:
-        print("Got IOError, '{}: {}'".format(e.errno, e.strerror))
-    else:
-        HeaderLine = HnbFile.readline()
-        for elem in HnbFile:
-            elem = elem.strip()
+
+    with urllib.request.urlopen(HnbUrl) as Url:
+        HeaderLine = Url.readline().decode('utf-8')
+        for elem in Url:
+            elem = elem.strip().decode('utf-8')
             column = elem.split()
 
             if Currency == 'all':
                 print("{}\t{}".format(str(column[0])[3:6], column[2]))
             elif Currency == str(column[0])[3:6]:
                 print("{}\t{}".format(str(column[0])[3:6], column[2]))
-
-        HnbFile.close()
 
 
 def getPBZData(FileName, Currency):
@@ -105,10 +89,8 @@ def RemoveDataFiles():
     """
     Function for removing the downloaded data files
     """
-    now = datetime.datetime.now()
-    HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
     PBZFileName = 'PBZteclist.xml'
-    FileNames = [HnbFileName, PBZFileName]
+    FileNames = [PBZFileName]
 
     for DataFile in FileNames:
         if os.path.isfile(DataFile) and os.access(DataFile, os.W_OK):
@@ -140,10 +122,10 @@ def doit():
 
     if args.All:
         getPBZDataFile('all')
-        getHNBDataFile('all')
+        getHNBData('all')
     elif args.currency:
         getPBZDataFile(args.currency)
-        getHNBDataFile(args.currency)
+        getHNBData(args.currency)
     elif args.reset:
         RemoveDataFiles()
 
