@@ -71,18 +71,30 @@ def doit():
             currencies', action="store_true", dest='All')
     parser.add_argument('-c', '--currency', help='Set the currency for which \
             the value is shown', type=str, dest='currency')
+    parser.add_argument('-s' '--source', help='Set the source from which the \
+            data is retrieved', type=str, dest='source')
 
     args = parser.parse_args()
 
-    if not args.All and not args.currency:
+    if not args.All and not args.currency and not args.source:
         parser.print_help()
 
-    if args.All:
+    if args.All and not args.source:
         getPBZData('all')
         getHNBData('all')
-    elif args.currency:
+    elif args.All and args.source:
+        if args.source == 'HNB':
+            getHNBData('all')
+        if args.source == 'PBZ':
+            getPBZData('all')
+    elif args.currency and not args.source:
         getPBZData(args.currency)
         getHNBData(args.currency)
+    elif args.currency and args.source:
+        if args.source == 'HNB':
+            getHNBData(args.currency)
+        if args.source == 'PBZ':
+            getPBZData(args.currency)
 
 
 if __name__ == "__main__":
