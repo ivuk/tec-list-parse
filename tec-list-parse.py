@@ -16,7 +16,7 @@ def getDataFile(Url, FileName):
         try:
             DataFile = urllib.request.urlopen(Url)
         except urllib.error.URLError as e:
-            print("Got URLError from urllib2, reason: {}".format(e.reason))
+            print("Got URLError from urllib.request, reason: {}".format(e.reason))
         else:
             Output = open(FileName, 'wb')
             Output.write(DataFile.read())
