@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 
-from xml.dom import minidom
-import urllib.request
-import datetime
-import os
 import argparse
 from collections import OrderedDict
+import datetime
+import os
+import urllib.request
+from xml.dom import minidom
 
 
 def getHNBData(Currency):
