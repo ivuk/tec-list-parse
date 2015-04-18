@@ -6,6 +6,7 @@ import urllib.request
 import datetime
 import os
 import argparse
+from collections import OrderedDict
 
 
 def getHNBData(Currency):
@@ -44,20 +45,29 @@ def getPBZData(Currency):
         doc = minidom.parse(Url)
         currencies = doc.getElementsByTagName("Currency")
 
-        for elem in currencies:
-            currname = elem.getElementsByTagName('Name')
-            currval = elem.getElementsByTagName('MeanRate')
+        currency_name = [elem.getElementsByTagName('Name')[0].firstChild.data
+                         for elem in currencies]
+        currency_value = \
+            [elem.getElementsByTagName('MeanRate')[0].firstChild.data
+             for elem in currencies]
 
-            for elem in currname:
-                ValName = elem.childNodes[0].nodeValue
+        """
+        # This is neater, but uses ordinary dict()
+        currency_list = \
+            {elem.getElementsByTagName('Name')[0].firstChild.data:
+             elem.getElementsByTagName('MeanRate')[0].firstChild.data
+             for elem in currencies}
+        for name, value in currency_list.items():
+            print("{}\t{}".format(name, value))
+        """
 
-                for elem in currval:
-                    ValMeanRate = elem.childNodes[0].nodeValue
+        currency_list = OrderedDict(zip(currency_name, currency_value))
 
-                    if Currency == 'all':
-                        print("{}\t{}".format(ValName, ValMeanRate))
-                    elif Currency == ValName:
-                        print("{}\t{}".format(ValName, ValMeanRate))
+        for name, value in currency_list.items():
+            if Currency == 'all':
+                print("{}\t{}".format(name, value))
+            elif Currency == name:
+                print("{}\t{}".format(name, value))
 
 
 def doit():
