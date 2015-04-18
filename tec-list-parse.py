@@ -1,71 +1,28 @@
 #!/usr/bin/env python3
 
 
-from xml.dom import minidom
-import urllib.request
-import datetime
-import os
 import argparse
+from collections import OrderedDict
+import datetime
+import urllib.request
+from xml.dom import minidom
 
 
-def getDataFile(Url, FileName):
+def getHNBData(Currency):
     """
-    Generic function for opening an URL and saving its content to file
-    """
-    if not os.path.isfile(FileName) and not os.access(FileName, os.R_OK):
-        try:
-            DataFile = urllib.request.urlopen(Url)
-        except urllib.error.URLError as e:
-            print("Got URLError from urllib.request, reason: {}".format(e.reason))
-        else:
-            Output = open(FileName, 'wb')
-            Output.write(DataFile.read())
-            Output.close()
-    else:
-        print("File '{}' already exists, using existing data.".format(FileName))
-
-
-def getHNBDataFile(Currency):
-    """
-    Get the required data file from HNB
+    Get the required data from HNB's website
+    Print out the data
     """
     now = datetime.datetime.now()
     HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
     HnbUrl = "http://www.hnb.hr/tecajn/{}".format(HnbFileName)
-    getDataFile(HnbUrl, HnbFileName)
 
-    if Currency == 'all':
-        getHNBData(HnbFileName, 'all')
-    else:
-        getHNBData(HnbFileName, Currency)
-
-
-def getPBZDataFile(Currency):
-    """
-    Get the required data file from PBZ
-    """
-    PBZUrl = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
-    getDataFile(PBZUrl, 'PBZteclist.xml')
-
-    if Currency == 'all':
-        getPBZData('PBZteclist.xml', 'all')
-    else:
-        getPBZData('PBZteclist.xml', Currency)
-
-
-def getHNBData(FileName, Currency):
-    """
-    Print out data from HNB
-    """
     print("--- HNB ---\nName\tMean Rate")
-    try:
-        HnbFile = open(FileName, "r")
-    except IOError as e:
-        print("Got IOError, '{}: {}'".format(e.errno, e.strerror))
-    else:
-        HeaderLine = HnbFile.readline()
-        for elem in HnbFile:
-            elem = elem.strip()
+
+    with urllib.request.urlopen(HnbUrl) as Url:
+        HeaderLine = Url.readline().decode('utf-8')
+        for elem in Url:
+            elem = elem.strip().decode('utf-8')
             column = elem.split()
 
             if Currency == 'all':
@@ -73,50 +30,43 @@ def getHNBData(FileName, Currency):
             elif Currency == str(column[0])[3:6]:
                 print("{}\t{}".format(str(column[0])[3:6], column[2]))
 
-        HnbFile.close()
 
+def getPBZData(Currency):
+    """
+    Get the required data from PBZ's website
+    Print out the data
+    """
+    PBZUrl = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
 
-def getPBZData(FileName, Currency):
-    """
-    Print out data from PBZ
-    """
     print("--- PBZ ---\nName\tMean Rate")
-    try:
-        doc = minidom.parse(FileName)
-    except IOError as e:
-        print("Got IOError, '{}: {}'".format(e.errno, e.strerror))
-    else:
+
+    with urllib.request.urlopen(PBZUrl) as Url:
+        doc = minidom.parse(Url)
         currencies = doc.getElementsByTagName("Currency")
-        for elem in currencies:
-            currname = elem.getElementsByTagName('Name')
-            currval = elem.getElementsByTagName('MeanRate')
-            for elem in currname:
-                ValName = elem.childNodes[0].nodeValue
-                for elem in currval:
-                    ValMeanRate = elem.childNodes[0].nodeValue
 
-                    if Currency == 'all':
-                        print("{}\t{}".format(ValName, ValMeanRate))
-                    elif Currency == ValName:
-                        print("{}\t{}".format(ValName, ValMeanRate))
+        currency_name = [elem.getElementsByTagName('Name')[0].firstChild.data
+                         for elem in currencies]
+        currency_value = \
+            [elem.getElementsByTagName('MeanRate')[0].firstChild.data
+             for elem in currencies]
 
+        """
+        # This is neater, but uses ordinary dict()
+        currency_list = \
+            {elem.getElementsByTagName('Name')[0].firstChild.data:
+             elem.getElementsByTagName('MeanRate')[0].firstChild.data
+             for elem in currencies}
+        for name, value in currency_list.items():
+            print("{}\t{}".format(name, value))
+        """
 
-def RemoveDataFiles():
-    """
-    Function for removing the downloaded data files
-    """
-    now = datetime.datetime.now()
-    HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
-    PBZFileName = 'PBZteclist.xml'
-    FileNames = [HnbFileName, PBZFileName]
+        currency_list = OrderedDict(zip(currency_name, currency_value))
 
-    for DataFile in FileNames:
-        if os.path.isfile(DataFile) and os.access(DataFile, os.W_OK):
-            try:
-                os.remove(DataFile)
-                print("Removing {}...".format(DataFile))
-            except OSError as e:
-                print("Got OSError, '{}: {}'".format(e.errno, e.strerror))
+        for name, value in currency_list.items():
+            if Currency == 'all':
+                print("{}\t{}".format(name, value))
+            elif Currency == name:
+                print("{}\t{}".format(name, value))
 
 
 def doit():
@@ -130,22 +80,30 @@ def doit():
             currencies', action="store_true", dest='All')
     parser.add_argument('-c', '--currency', help='Set the currency for which \
             the value is shown', type=str, dest='currency')
-    parser.add_argument('-r', '--reset', help='Remove the data files that \
-            have been downloaded', action="store_true", dest='reset')
+    parser.add_argument('-s' '--source', help='Set the source from which the \
+            data is retrieved', type=str, dest='source')
 
     args = parser.parse_args()
 
-    if not args.All and not args.currency and not args.reset:
+    if not args.All and not args.currency and not args.source:
         parser.print_help()
 
-    if args.All:
-        getPBZDataFile('all')
-        getHNBDataFile('all')
-    elif args.currency:
-        getPBZDataFile(args.currency)
-        getHNBDataFile(args.currency)
-    elif args.reset:
-        RemoveDataFiles()
+    if args.All and not args.source:
+        getPBZData('all')
+        getHNBData('all')
+    elif args.All and args.source:
+        if args.source == 'HNB':
+            getHNBData('all')
+        if args.source == 'PBZ':
+            getPBZData('all')
+    elif args.currency and not args.source:
+        getPBZData(args.currency)
+        getHNBData(args.currency)
+    elif args.currency and args.source:
+        if args.source == 'HNB':
+            getHNBData(args.currency)
+        if args.source == 'PBZ':
+            getPBZData(args.currency)
 
 
 if __name__ == "__main__":
