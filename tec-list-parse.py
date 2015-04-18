@@ -4,7 +4,6 @@
 import argparse
 from collections import OrderedDict
 import datetime
-import os
 import urllib.request
 from xml.dom import minidom
 
