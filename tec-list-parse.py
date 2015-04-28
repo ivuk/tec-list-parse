@@ -20,7 +20,8 @@ def getHNBData(Currency):
     print("--- HNB ---\nName\tMean Rate")
 
     with urllib.request.urlopen(HnbUrl) as Url:
-        HeaderLine = Url.readline().decode('utf-8')
+        # Skip the header line
+        Url.readline()
         for elem in Url:
             elem = elem.strip().decode('utf-8')
             column = elem.split()
