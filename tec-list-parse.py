@@ -3,8 +3,8 @@
 
 import argparse
 from collections import OrderedDict
-import datetime
-import urllib.request
+from datetime import datetime
+from urllib.request import urlopen
 from xml.dom import minidom
 
 
@@ -13,13 +13,13 @@ def getHNBData(Currency):
     Get the required data from HNB's website
     Print out the data
     """
-    now = datetime.datetime.now()
+    now = datetime.now()
     HnbFileName = "f{}.dat".format(now.strftime("%d%m%y"))
     HnbUrl = "http://www.hnb.hr/tecajn/{}".format(HnbFileName)
 
     print("--- HNB ---\nName\tMean Rate")
 
-    with urllib.request.urlopen(HnbUrl) as Url:
+    with urlopen(HnbUrl) as Url:
         # Skip the header line
         Url.readline()
         for elem in Url:
@@ -41,7 +41,7 @@ def getPBZData(Currency):
 
     print("--- PBZ ---\nName\tMean Rate")
 
-    with urllib.request.urlopen(PBZUrl) as Url:
+    with urlopen(PBZUrl) as Url:
         doc = minidom.parse(Url)
         currencies = doc.getElementsByTagName("Currency")
 
