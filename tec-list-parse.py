@@ -23,8 +23,7 @@ def getHNBData(Currency):
         # Skip the header line
         Url.readline()
         for elem in Url:
-            elem = elem.strip().decode('utf-8')
-            column = elem.split()
+            column = elem.strip().decode('utf-8').split()
 
             if Currency == 'all':
                 print("{}\t{}".format(str(column[0])[3:6], column[2]))
