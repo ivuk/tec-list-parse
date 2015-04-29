@@ -27,7 +27,7 @@ def get_hnb_data(currency):
 
             if currency == 'all':
                 print('{}\t{}'.format(str(column[0])[3:6], column[2]))
-            elif currency == str(column[0])[3:6]:
+            elif currency.lower() == str(column[0])[3:6].lower():
                 print('{}\t{}'.format(str(column[0])[3:6], column[2]))
 
 
@@ -65,7 +65,7 @@ def get_pbz_data(currency):
         for name, value in currency_list.items():
             if currency == 'all':
                 print('{}\t{}'.format(name, value))
-            elif currency == name:
+            elif currency.lower() == name.lower():
                 print('{}\t{}'.format(name, value))
 
 
@@ -94,7 +94,7 @@ def get_erste_data(currency):
     for name, value in currency_list.items():
         if currency == 'all':
             print('{}\t{}'.format(name, value))
-        elif currency == name:
+        elif currency.lower() == name.lower():
             print('{}\t{}'.format(name, value))
 
 
