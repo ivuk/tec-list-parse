@@ -69,6 +69,35 @@ def getPBZData(Currency):
                 print("{}\t{}".format(name, value))
 
 
+def getErsteData(Currency):
+    """
+    Get the required data from Erste's website
+    Print out the data
+    """
+    now = datetime.now()
+    ErsteFileName = 'TL_{}.xml'.format(now.strftime("%Y%m%d"))
+    ErsteUrl = 'http://local.erstebank.hr/alati/SaveAsXML.aspx?ime={}'.format(
+        ErsteFileName)
+
+    print('--- ERSTE ---\nName\tMean Rate')
+
+    with urlopen(ErsteUrl) as Url:
+        doc = minidom.parse(Url)
+        currencies = doc.getElementsByTagName('valuta')
+        currency_name = [elem.getElementsByTagName('opis')[0].firstChild.data
+                         for elem in currencies]
+        currency_value = [elem.getElementsByTagName('t3')[0].firstChild.data
+                          for elem in currencies]
+
+    currency_list = OrderedDict(zip(currency_name, currency_value))
+
+    for name, value in currency_list.items():
+        if Currency == 'all':
+            print('{}\t{}'.format(name, value))
+        elif Currency == name:
+            print('{}\t{}'.format(name, value))
+
+
 def doit():
     """
     Set up the available program options
@@ -90,20 +119,26 @@ def doit():
 
     if args.All and not args.source:
         getPBZData('all')
+        getErsteData('all')
         getHNBData('all')
     elif args.All and args.source:
         if args.source == 'HNB':
             getHNBData('all')
         if args.source == 'PBZ':
             getPBZData('all')
+        if args.source == 'ERSTE':
+            getErsteData('all')
     elif args.currency and not args.source:
         getPBZData(args.currency)
+        getErsteData(args.currency)
         getHNBData(args.currency)
     elif args.currency and args.source:
         if args.source == 'HNB':
             getHNBData(args.currency)
         if args.source == 'PBZ':
             getPBZData(args.currency)
+        if args.source == 'ERSTE':
+            getErsteData(args.currency)
 
 
 if __name__ == "__main__":
