@@ -122,22 +122,22 @@ def doit():
         get_erste_data('all')
         get_hnb_data('all')
     elif args.all and args.source:
-        if args.source == 'HNB':
+        if args.source.lower() == 'HNB'.lower():
             get_hnb_data('all')
-        if args.source == 'PBZ':
+        if args.source.lower() == 'PBZ'.lower():
             get_pbz_data('all')
-        if args.source == 'ERSTE':
+        if args.source.lower() == 'ERSTE'.lower():
             get_erste_data('all')
     elif args.currency and not args.source:
         get_pbz_data(args.currency)
         get_erste_data(args.currency)
         get_hnb_data(args.currency)
     elif args.currency and args.source:
-        if args.source == 'HNB':
+        if args.source.lower() == 'HNB'.lower():
             get_hnb_data(args.currency)
-        if args.source == 'PBZ':
+        if args.source.lower() == 'PBZ'.lower():
             get_pbz_data(args.currency)
-        if args.source == 'ERSTE':
+        if args.source.lower() == 'ERSTE'.lower():
             get_erste_data(args.currency)
 
 
