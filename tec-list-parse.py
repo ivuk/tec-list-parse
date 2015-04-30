@@ -8,26 +8,19 @@ from urllib.request import urlopen
 from xml.dom import minidom
 
 
+rate_titles = ['Buy', 'Mean', 'Sell']
+
+
 def get_hnb_data(currency, rate_type):
     '''
     Get the required data from HNB's website
     Print out the data
     '''
-    if rate_type.lower() == 'buy':
-        hnb_rate_type = 1
-        hnb_rate_title = 'Buy'
-    elif rate_type.lower() == 'sell':
-        hnb_rate_type = 3
-        hnb_rate_title = 'Sell'
-    else:
-        hnb_rate_type = 2
-        hnb_rate_title = 'Mean'
-
     now = datetime.now()
     hnb_file_name = 'f{}.dat'.format(now.strftime('%d%m%y'))
     hnb_url = 'http://www.hnb.hr/tecajn/{}'.format(hnb_file_name)
 
-    print('--- HNB ---\nName\t{} Rate'.format(hnb_rate_title))
+    print('--- HNB ---\nName\t{} Rate'.format(rate_titles[rate_type]))
 
     with urlopen(hnb_url) as Url:
         # Skip the header line
@@ -37,10 +30,10 @@ def get_hnb_data(currency, rate_type):
 
             if currency == 'all':
                 print('{}\t{}'.format(str(column[0])[3:6],
-                                      column[hnb_rate_type]))
+                                      column[rate_type + 1]))
             elif currency.lower() == str(column[0])[3:6].lower():
                 print('{}\t{}'.format(str(column[0])[3:6],
-                                      column[hnb_rate_type]))
+                                      column[rate_type + 1]))
 
 
 def get_pbz_data(currency, rate_type):
@@ -48,19 +41,11 @@ def get_pbz_data(currency, rate_type):
     Get the required data from PBZ's website
     Print out the data
     '''
-    if rate_type.lower() == 'buy':
-        pbz_rate_type = 'BuyRateForeign'
-        pbz_rate_title = 'Buy'
-    elif rate_type.lower() == 'sell':
-        pbz_rate_type = 'SellRateForeign'
-        pbz_rate_title = 'Sell'
-    else:
-        pbz_rate_type = 'MeanRate'
-        pbz_rate_title = 'Mean'
+    rate_types = ['BuyRateForeign', 'MeanRate', 'SellRateForeign']
 
     pbz_url = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
 
-    print('--- PBZ ---\nName\t{} Rate'.format(pbz_rate_title))
+    print('--- PBZ ---\nName\t{} Rate'.format(rate_titles[rate_type]))
 
     with urlopen(pbz_url) as Url:
         doc = minidom.parse(Url)
@@ -69,7 +54,7 @@ def get_pbz_data(currency, rate_type):
         currency_name = [elem.getElementsByTagName('Name')[0].firstChild.data
                          for elem in currencies]
         currency_value = \
-            [elem.getElementsByTagName(pbz_rate_type)[0].firstChild.data
+            [elem.getElementsByTagName(rate_types[rate_type])[0].firstChild.data
              for elem in currencies]
 
         '''
@@ -96,30 +81,22 @@ def get_erste_data(currency, rate_type):
     Get the required data from Erste's website
     Print out the data
     '''
-    if rate_type.lower() == 'buy':
-        erste_rate_type = 't1'
-        erste_rate_title = 'Buy'
-    elif rate_type.lower() == 'sell':
-        erste_rate_type = 't3'
-        erste_rate_title = 'Sell'
-    else:
-        erste_rate_type = 't2'
-        erste_rate_title = 'Mean'
+    rate_types = ['t1', 't2', 't3']
 
     now = datetime.now()
     erste_file_name = 'TL_{}.xml'.format(now.strftime('%Y%m%d'))
     erste_url = 'http://local.erstebank.hr/alati/SaveAsXML.aspx?ime={}'.format(
         erste_file_name)
 
-    print('--- ERSTE ---\nName\t{} Rate'.format(erste_rate_title))
+    print('--- ERSTE ---\nName\t{} Rate'.format(rate_titles[rate_type]))
 
     with urlopen(erste_url) as Url:
         doc = minidom.parse(Url)
         currencies = doc.getElementsByTagName('valuta')
         currency_name = [elem.getElementsByTagName('opis')[0].firstChild.data
                          for elem in currencies]
-        currency_value = [elem.getElementsByTagName(erste_rate_type)[0].firstChild.data
-                          for elem in currencies]
+        currency_value = [elem.getElementsByTagName(
+            rate_types[rate_type])[0].firstChild.data for elem in currencies]
 
     currency_list = OrderedDict(zip(currency_name, currency_value))
 
@@ -142,7 +119,8 @@ def doit():
     parser.add_argument('-c', '--currency', help='Set the currency for which \
             the value is shown', type=str, dest='currency')
     parser.add_argument('-r', '--rate', help='Set the currency rate type for \
-            which the value is shown', type=str, dest='rate_type', default='mean')
+            which the value is shown', type=str, dest='rate_type',
+                        default='mean')
     parser.add_argument('-s' '--source', help='Set the source from which the \
             data is retrieved', type=str, dest='source')
 
@@ -151,28 +129,35 @@ def doit():
     if not args.all and not args.currency and not args.source:
         parser.print_help()
 
+    if args.rate_type.lower() == 'buy':
+        rate_type = 0
+    elif args.rate_type.lower() == 'sell':
+        rate_type = 2
+    else:
+        rate_type = 1
+
     if args.all and not args.source:
-        get_pbz_data('all', args.rate_type)
-        get_erste_data('all', args.rate_type)
-        get_hnb_data('all', args.rate_type)
+        get_pbz_data('all', rate_type)
+        get_erste_data('all', rate_type)
+        get_hnb_data('all', rate_type)
     elif args.all and args.source:
         if args.source.lower() == 'hnb':
-            get_hnb_data('all', args.rate_type)
+            get_hnb_data('all', rate_type)
         if args.source.lower() == 'pbz':
-            get_pbz_data('all', args.rate_type)
+            get_pbz_data('all', rate_type)
         if args.source.lower() == 'erste':
-            get_erste_data('all', args.rate_type)
+            get_erste_data('all', rate_type)
     elif args.currency and not args.source:
-        get_pbz_data(args.currency, args.rate_type)
-        get_erste_data(args.currency, args.rate_type)
-        get_hnb_data(args.currency, args.rate_type)
+        get_pbz_data(args.currency, rate_type)
+        get_erste_data(args.currency, rate_type)
+        get_hnb_data(args.currency, rate_type)
     elif args.currency and args.source:
         if args.source.lower() == 'hnb':
-            get_hnb_data(args.currency, args.rate_type)
+            get_hnb_data(args.currency, rate_type)
         if args.source.lower() == 'pbz':
-            get_pbz_data(args.currency, args.rate_type)
+            get_pbz_data(args.currency, rate_type)
         if args.source.lower() == 'erste':
-            get_erste_data(args.currency, args.rate_type)
+            get_erste_data(args.currency, rate_type)
 
 
 if __name__ == '__main__':
