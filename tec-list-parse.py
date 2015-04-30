@@ -156,22 +156,22 @@ def doit():
         get_erste_data('all', args.rate_type)
         get_hnb_data('all', args.rate_type)
     elif args.all and args.source:
-        if args.source.lower() == 'HNB'.lower():
+        if args.source.lower() == 'hnb':
             get_hnb_data('all', args.rate_type)
-        if args.source.lower() == 'PBZ'.lower():
+        if args.source.lower() == 'pbz':
             get_pbz_data('all', args.rate_type)
-        if args.source.lower() == 'ERSTE'.lower():
+        if args.source.lower() == 'erste':
             get_erste_data('all', args.rate_type)
     elif args.currency and not args.source:
         get_pbz_data(args.currency, args.rate_type)
         get_erste_data(args.currency, args.rate_type)
         get_hnb_data(args.currency, args.rate_type)
     elif args.currency and args.source:
-        if args.source.lower() == 'HNB'.lower():
+        if args.source.lower() == 'hnb':
             get_hnb_data(args.currency, args.rate_type)
-        if args.source.lower() == 'PBZ'.lower():
+        if args.source.lower() == 'pbz':
             get_pbz_data(args.currency, args.rate_type)
-        if args.source.lower() == 'ERSTE'.lower():
+        if args.source.lower() == 'erste':
             get_erste_data(args.currency, args.rate_type)
 
 
