@@ -141,7 +141,7 @@ def doit():
             currencies', action='store_true', dest='all')
     parser.add_argument('-c', '--currency', help='Set the currency for which \
             the value is shown', type=str, dest='currency')
-    parser.add_argument('-t', '--type', help='Set the currency rate type for \
+    parser.add_argument('-r', '--rate', help='Set the currency rate type for \
             which the value is shown', type=str, dest='rate_type', default='mean')
     parser.add_argument('-s' '--source', help='Set the source from which the \
             data is retrieved', type=str, dest='source')
