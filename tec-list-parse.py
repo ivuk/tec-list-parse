@@ -20,10 +20,10 @@ def get_hnb_data(currency, rate_type):
     hnb_file_name = 'f{}.dat'.format(now.strftime('%d%m%y'))
     hnb_url = 'http://www.hnb.hr/tecajn/{}'.format(hnb_file_name)
 
-    with urlopen(hnb_url) as Url:
+    with urlopen(hnb_url) as url:
         # Skip the header line
-        Url.readline()
-        hnb_data = [elem.strip().decode('utf-8').split() for elem in Url]
+        url.readline()
+        hnb_data = [elem.strip().decode('utf-8').split() for elem in url]
 
     print('--- HNB ---\nName\t{} Rate'.format(rate_titles[rate_type]))
 
@@ -47,8 +47,8 @@ def get_pbz_data(currency, rate_type):
 
     print('--- PBZ ---\nName\t{} Rate'.format(rate_titles[rate_type]))
 
-    with urlopen(pbz_url) as Url:
-        doc = minidom.parse(Url)
+    with urlopen(pbz_url) as url:
+        doc = minidom.parse(url)
         currencies = doc.getElementsByTagName('Currency')
 
         currency_name = [elem.getElementsByTagName('Name')[0].firstChild.data
@@ -90,8 +90,8 @@ def get_erste_data(currency, rate_type):
 
     print('--- ERSTE ---\nName\t{} Rate'.format(rate_titles[rate_type]))
 
-    with urlopen(erste_url) as Url:
-        doc = minidom.parse(Url)
+    with urlopen(erste_url) as url:
+        doc = minidom.parse(url)
         currencies = doc.getElementsByTagName('valuta')
         currency_name = [elem.getElementsByTagName('opis')[0].firstChild.data
                          for elem in currencies]
