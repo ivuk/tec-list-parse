@@ -20,20 +20,20 @@ def get_hnb_data(currency, rate_type):
     hnb_file_name = 'f{}.dat'.format(now.strftime('%d%m%y'))
     hnb_url = 'http://www.hnb.hr/tecajn/{}'.format(hnb_file_name)
 
-    print('--- HNB ---\nName\t{} Rate'.format(rate_titles[rate_type]))
-
     with urlopen(hnb_url) as Url:
         # Skip the header line
         Url.readline()
-        for elem in Url:
-            column = elem.strip().decode('utf-8').split()
+        hnb_data = [elem.strip().decode('utf-8').split() for elem in Url]
 
-            if currency == 'all':
-                print('{}\t{}'.format(str(column[0])[3:6],
-                                      column[rate_type + 1]))
-            elif currency.lower() == str(column[0])[3:6].lower():
-                print('{}\t{}'.format(str(column[0])[3:6],
-                                      column[rate_type + 1]))
+    print('--- HNB ---\nName\t{} Rate'.format(rate_titles[rate_type]))
+
+    for elem in hnb_data:
+        if currency == 'all':
+            print('{}\t{}'.format(str(elem[0])[3:6],
+                                  elem[rate_type + 1]))
+        elif currency.lower() == str(elem[0])[3:6].lower():
+            print('{}\t{}'.format(str(elem[0])[3:6],
+                                  elem[rate_type + 1]))
 
 
 def get_pbz_data(currency, rate_type):
