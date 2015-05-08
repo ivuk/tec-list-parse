@@ -45,7 +45,6 @@ def get_pbz_data(currency, rate_type):
 
     pbz_url = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
 
-
     with urlopen(pbz_url) as url:
         doc = minidom.parse(url)
         currencies = doc.getElementsByTagName('Currency')
