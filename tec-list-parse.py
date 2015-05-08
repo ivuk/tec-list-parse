@@ -45,7 +45,6 @@ def get_pbz_data(currency, rate_type):
 
     pbz_url = 'http://www.pbz.hr/Downloads/PBZteclist.xml'
 
-    print('--- PBZ ---\nName\t{} Rate'.format(rate_titles[rate_type]))
 
     with urlopen(pbz_url) as url:
         doc = minidom.parse(url)
@@ -67,13 +66,15 @@ def get_pbz_data(currency, rate_type):
             print('{}\t{}'.format(name, value))
         '''
 
-        currency_list = OrderedDict(zip(currency_name, currency_value))
+    currency_list = OrderedDict(zip(currency_name, currency_value))
 
-        for name, value in currency_list.items():
-            if currency == 'all':
-                print('{}\t{}'.format(name, value))
-            elif currency.lower() == name.lower():
-                print('{}\t{}'.format(name, value))
+    print('--- PBZ ---\nName\t{} Rate'.format(rate_titles[rate_type]))
+
+    for name, value in currency_list.items():
+        if currency == 'all':
+            print('{}\t{}'.format(name, value))
+        elif currency.lower() == name.lower():
+            print('{}\t{}'.format(name, value))
 
 
 def get_erste_data(currency, rate_type):
@@ -88,8 +89,6 @@ def get_erste_data(currency, rate_type):
     erste_url = 'http://local.erstebank.hr/alati/SaveAsXML.aspx?ime={}'.format(
         erste_file_name)
 
-    print('--- ERSTE ---\nName\t{} Rate'.format(rate_titles[rate_type]))
-
     with urlopen(erste_url) as url:
         doc = minidom.parse(url)
         currencies = doc.getElementsByTagName('valuta')
@@ -99,6 +98,8 @@ def get_erste_data(currency, rate_type):
             rate_types[rate_type])[0].firstChild.data for elem in currencies]
 
     currency_list = OrderedDict(zip(currency_name, currency_value))
+
+    print('--- ERSTE ---\nName\t{} Rate'.format(rate_titles[rate_type]))
 
     for name, value in currency_list.items():
         if currency == 'all':
